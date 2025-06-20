@@ -5,6 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem 
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { UserMenuContent } from "../user-menu-content";
 import { Separator } from "../ui/separator";
+import { AtSignIcon, LogIn } from "lucide-react";
 
 
 export default function ItemHeaderRight(){
@@ -15,21 +16,30 @@ export default function ItemHeaderRight(){
                 <>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <div className="focus-visible:ring-0">
-                                Gabung yuk!
+                            <div className="flex gap-1 focus-visible:ring-0">
+                                <span className="self-center">Gabung</span>
+                                <span className="rounded-full w-8 h-8 align-center p-1 -rotate-15 text-sm bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                    yuk!
+                                </span>
+
                             </div>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent>
+                        <DropdownMenuContent
+                                align="end"
+                                side='bottom'
+                            >
                             <DropdownMenuGroup>
                                 <DropdownMenuItem asChild>
                                     <Link className="block w-full" href={route('login')} as="button" prefetch>
+                                        <LogIn className="mr-2"/>
                                         Login
                                     </Link>
                                 </DropdownMenuItem>
                                 <Separator/>
                                 <DropdownMenuItem asChild>
                                     <Link className="block w-full focus-visible:ring-0" href={route('register')} as="button" prefetch>
-                                        Daftar
+                                        <AtSignIcon className="mr-2"/>
+                                        Register
                                     </Link>
                                 </DropdownMenuItem>
                             </DropdownMenuGroup>

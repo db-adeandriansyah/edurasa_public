@@ -39,5 +39,22 @@ export interface User {
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
+    roles : PeranType[];
     [key: string]: unknown; // This allows for additional properties...
+}
+
+/**
+ * @info: peranType diambil dari database di tabel Roles;
+ */
+export interface PeranType {
+    uuid : string;
+    name : string;
+    permissions : PermissionType[];
+}
+/**
+ * @info: permissionType diambil dari database di tabel Permission;
+ */
+export interface PermissionType {
+    uuid:string;
+    name:string;
 }

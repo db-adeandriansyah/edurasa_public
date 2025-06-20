@@ -3,7 +3,9 @@ import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { type User } from '@/types';
 import { Link, router } from '@inertiajs/react';
-import { LogOut, Settings } from 'lucide-react';
+import { LogOut, Settings, Sidebar, SunMoon } from 'lucide-react';
+import AppearanceToggleTab from './appearance-tabs';
+import { DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from '@radix-ui/react-dropdown-menu';
 
 interface UserMenuContentProps {
     user: User;
@@ -16,7 +18,6 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
         cleanup();
         router.flushAll();
     };
-
     return (
         <>
             <DropdownMenuLabel className="p-0 font-normal">
@@ -26,11 +27,43 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+                <DropdownMenuSub>
+                    <DropdownMenuSubTrigger className='relative flex items-center gap-2 rounded-sm px-2 py-1.5 outline-hidden'>
+                            <SunMoon className="h-4 w-4"/>
+                            <span className="ml-1.5 text-sm">Mode</span>
+                        </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                        <DropdownMenuItem asChild>
+                            <AppearanceToggleTab className='flex-col'/>
+
+                        </DropdownMenuItem>
+
+                    </DropdownMenuSubContent>
+                </DropdownMenuSub>
+
+            <DropdownMenuSeparator />
+            </DropdownMenuGroup>
+            <DropdownMenuGroup>
                 <DropdownMenuItem asChild>
                     <Link className="block w-full" href={route('profile.edit')} as="button" prefetch onClick={cleanup}>
                         <Settings className="mr-2" />
-                        Settings
+                        Profile
                     </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+
+                    {route().current('dashboard')?(
+                        <Link className="block w-full" href={route('home')} as="button" prefetch onClick={cleanup}>
+                            <Sidebar className="mr-2" />
+                            Beranda
+                        </Link>
+                    ):(
+
+                        <Link className="block w-full" href={route('dashboard')} as="button" prefetch onClick={cleanup}>
+                            <Sidebar className="mr-2" />
+                            Dashboard
+                        </Link>
+                    )}
                 </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
