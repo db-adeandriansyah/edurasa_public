@@ -3,7 +3,7 @@ import { PrintAreaWithToolbarDefault, ToolbarDefault, ToolbarDefaultProvider } f
 import WorkplaceShell from "@/components/templating/workplace-shell";
 import WorkplaceSidebar, { WorkplaceSidebarSample } from "@/components/templating/workplace-sidebar";
 import { NavItem } from "@/types";
-import { LayoutGrid, UserCheck } from "lucide-react";
+import { BadgeInfo, LayoutGrid, UserCheck } from "lucide-react";
 
 const subfitur:NavItem[] =[
     {
@@ -12,21 +12,22 @@ const subfitur:NavItem[] =[
         icon: LayoutGrid,
     },
     {
-        title: 'Data Per Jenang',
+        title: 'Data Per Jenjang',
         href: '/db-siswa2',
         icon: UserCheck,
     }
 ]
 const otherfitur:NavItem[] =[
     {
-        title: 'Daftar Siswa',
-        href: '/db-siswa',
-        icon: LayoutGrid,
+        title: 'Petunjuk Penggunaan',
+        href: '/menu',
+        icon: BadgeInfo,
     },
 ]
 export default function DbSiswaTemplate({children, title}:{children:React.ReactNode, title:string}){
+    
     return (
-        <WorkplaceShell title={title}>
+        <WorkplaceShell title={title} showRoom={true} showPrintable={true} typeRoom={'rombel'}>
             <div className="flex">
                 <WorkplaceSidebar mainSubfitur={subfitur} optionalSubfitur={otherfitur}/>
                 <ToolbarDefaultProvider>

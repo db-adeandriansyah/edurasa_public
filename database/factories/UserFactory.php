@@ -2,6 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Enums\ApprovalEnum;
+use App\Models\LogApproval;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -40,5 +43,31 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+    /**
+     * Configure the factory with additional settings.
+     */
+    public function configure(): static 
+    {
+        return $this->afterCreating(function (User $user) {
+            // Additional actions after creating a user can be added here.
+            LogApproval::create([
+                'user_id' => $user->id,
+                'description' => 'Pertama kali membuat akun',
+                'status' => ApprovalEnum::PENDING->value,
+                'evidence_url' => null,
+                'evidence_type' => null,
+                'evidence_source' => null,
+            ])  ;
+        });
+    }   
+    /**
+     * Assign a specific role to the user after creation.
+     */
+    public function withRole(string $roleName): static
+    {
+        return $this->afterCreating(function (User $user) use ($roleName) {
+            $user->assignRole($roleName);
+        });
     }
 }

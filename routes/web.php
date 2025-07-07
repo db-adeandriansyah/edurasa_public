@@ -20,18 +20,18 @@ Route::get('menu',MenuController::class)->middleware(['auth', 'verified'])->name
 
 Route::get('fitur',function(){
     return Inertia::render('fitur');
-})->middleware(['auth', 'verified'])->name('menu');
+})->middleware(['auth', 'verified'])->name('fitur');
 
 Route::get('aplikasi',function(){
     return Inertia::render('aplikasi');
 })->middleware(['auth', 'verified'])->name('aplikasi');
 
 Route::get('db-siswa',function(){
-    $data =  Auth::user()->datafitur();
-    return Inertia::render('dbsiswa',[
-        'data' => $data
-    ]);
+    $data =  Auth::user()->dataprofil2();
+    // dd($data->dataprofil2());
+    return Inertia::render('dbsiswa');
 })->middleware(['auth', 'verified'])->name('dbsiswa');
 
+require __DIR__. '/approval.php';
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

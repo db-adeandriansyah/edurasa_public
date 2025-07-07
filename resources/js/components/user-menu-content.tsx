@@ -59,7 +59,7 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
                         </Link>
                     ):(
 
-                        <Link className="block w-full" href={route('dashboard')} as="button" prefetch onClick={cleanup}>
+                        <Link className="block w-full" href={route('menu')} as="button" prefetch onClick={cleanup}>
                             <Sidebar className="mr-2" />
                             Dashboard
                         </Link>

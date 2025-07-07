@@ -1,13 +1,13 @@
 <?php
 
-namespace App;
+namespace App\Enums;
 
 enum Peran: string
 {
-    case SUPER_ADMIN = 'super_admin';
+    case SUPER_ADMIN = 'super admin';
     case ADMIN = 'admin';
-    case GURU_KELAS = 'guru_kelas';
-    case GURU_MAPEL = 'guru_mapel';
+    case GURU_KELAS = 'guru kelas';
+    case GURU_MAPEL = 'guru mapel';
     case OPS = 'ops';
     case PENJAGA = 'penjaga';
     case KEPSEK = 'kepsek';

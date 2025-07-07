@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\ApprovalEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,6 +18,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('state_approval',array_column(ApprovalEnum::cases(),'value'))->default(ApprovalEnum::PENDING->value);
             $table->rememberToken();
             $table->timestamps();
             $table->primary('id');

@@ -14,23 +14,28 @@ import WorkplaceHeader from "./workplace-header";
 import WorkplaceSidebar from './workplace-sidebar';
 import WorkplaceSticky from "./workplace-sticky";
 
+type typeRoom = 'rombel' | 'jenjang' ;
 interface shellPropsAplikasi {
     title: string,
-    children?:React.ReactNode
+    children?:React.ReactNode,
+    showRoom?:boolean,
+    showPrintable?:boolean,
+    typeRoom?:typeRoom
 }
-export default function WorkplaceShell({title, children}:shellPropsAplikasi){
+export default function WorkplaceShell({title, children,showRoom,showPrintable,typeRoom='rombel'}:shellPropsAplikasi){
     return(
         <MyWorkplace>
             <WorkplaceHeader/>
             <MyContentWorkplace className="shadow-lg bg-gray-50/50 backdrop-blur-[70px]/50 min-h-full">
-                <WorkplaceSticky title={title}/>
-                {/* <div className="flex">
-                    <WorkplaceSidebar/>
-                    <WorkplaceControlPrintarea>
-                        {children}
-                    </WorkplaceControlPrintarea>
-                </div> */}
+                <WorkplaceSticky 
+                    title = {title} 
+                    isShowRoom= {showRoom} 
+                    isShowPrintable= {showPrintable}
+                    typeRoom= {typeRoom}
+                />
+
                 {children}
+            
             </MyContentWorkplace>
         </MyWorkplace>
     )

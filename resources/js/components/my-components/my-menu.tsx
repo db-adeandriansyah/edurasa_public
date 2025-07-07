@@ -9,7 +9,7 @@ const koleksiMenu:typeKoleksiMenu[]=[
         {
             title:'Approval',
             description: 'Anda dapat mengecek dan memvalidasi user yang mendaftar ke aplikasi',
-            routeName: 'menu',
+            routeName:'approval',
             urlIcon:approval
         },
         {

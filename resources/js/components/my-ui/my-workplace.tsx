@@ -1,7 +1,7 @@
 import * as React from "react"
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import { SharedData, User } from "@/types";
+import { ConfigData, KelasAmpuType, KopSurType, SchoolType, SharedData, User } from "@/types";
 import { usePage } from "@inertiajs/react";
 import { Button } from "../ui/button";
 import { AlignJustifyIcon, ChevronsLeftRight, ChevronsLeftRightEllipsis, ChevronsRightLeft, FileStack } from "lucide-react";
@@ -10,8 +10,18 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, VariantProps } from "class-variance-authority";
 import { useReactToPrint } from "react-to-print";
+import Cookies from 'js-cookie';
 
-const SIDEBAR_COOKIE_NAME = "sidebar_state"
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
+import { Toaster } from "../ui/sonner";
+
+const SIDEBAR_COOKIE_NAME = "workplace_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 const SIDEBAR_WIDTH = "16rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
@@ -28,7 +38,12 @@ type typeWorkplace ={
     setOpenMobile: (open: boolean) => void
     toggelWorkplace: () => void
     printArea:React.RefObject<HTMLDivElement|null>
-
+    sekolah?: SchoolType
+    kop_custom?: KopSurType[]
+    kelas_ampu?: KelasAmpuType[]
+    peran?: string;
+    kelasAmpuSelected?: KelasAmpuType | null;
+    handleKelasAmpuSelected?: (kelasAmpu: KelasAmpuType | null) => void;
 }
 
 const WorkplaceContext = React.createContext<typeWorkplace|null>(null);
@@ -55,9 +70,16 @@ function MyWorkplace({
             onOpenChange?: (open:boolean)=>void
         }
     ){
-        const user = usePage<SharedData>().props.auth.user;
+        const dataServer = usePage<SharedData>().props;
+        const configData = dataServer.auth.config_data as ConfigData | undefined;
+        const user = dataServer.auth.user;
+        
+        const sekolah = configData?.sekolah as SchoolType | undefined;
+        const kop_custom = configData?.kop_custom as KopSurType[] | undefined;
+        const kelas_ampu = configData?.kelas_ampu as KelasAmpuType[]
+        const peran = configData?.peran as string | undefined;
         const isMobile = useIsMobile();
-        console.log(usePage().props.data)
+        
         // state open di desktop berbeda dengan di mobile. Jika di desktop awalnya open, maka di mobile
         // awalnya adalah close,
         const [openMobile,setOpenMobile] = React.useState(false);
@@ -71,12 +93,11 @@ function MyWorkplace({
          * - Namun, kita ikuti caranya. Karena kita tidak tahu efek dari kode lain nantinya
          */
 
-
         //_open dan _setOpen state internal di kompenen ini;
         const [_open , _setOpen] = React.useState(defaultOpen);
         // karena komponen ini menyediakan prop 'open' kita samakan persepsi;
         // jika 'open' props ada, maka gunakan 'open' yang diteruskan di kompenen,
-        // jika tidak ada, kita pake state yang ada di internal ini
+        // jika tidak ada, kita pake state yang ada di internal berikut ini:
         const open = openProp ?? _open;
 
         // setOpen ini milik internal (_setOpen):
@@ -89,8 +110,12 @@ function MyWorkplace({
                     _setOpen(openState)
                 }
 
+                // This sets the cookie to keep the sidebar state.
+                      document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+                    Cookies.set(SIDEBAR_COOKIE_NAME, openState.toString(), {
+                        expires: SIDEBAR_COOKIE_MAX_AGE / (60 * 60 * 24), // Convert seconds to days    
+                    })
                 }
-
                 ,[setOpenProp, open]
             )
 
@@ -99,18 +124,64 @@ function MyWorkplace({
           }, [isMobile, setOpen, setOpenMobile])
 
         const state = open ? "expanded" : "collapsed";
-
+        
+        // Jika di mobile, maka state adalah 'collapsed' jika openMobile false, dan 'expanded' jika openMobile true
+        
         //Buat Refrensi Elemen
         const printArea = React.useRef<HTMLDivElement>(null);
 
         React.useEffect(() => {
-            if (printArea.current) {
-                const styles = window.getComputedStyle(printArea.current);
-                console.log(styles.backgroundColor); // Example: Accessing background-color
-                console.log(styles.getPropertyValue('padding')); // Example: Accessing font-size
-            }
-        }, []);
+            const handleKeyDown = (event: KeyboardEvent) => {
+                if (
+                  event.key === SIDEBAR_KEYBOARD_SHORTCUT &&
+                  (event.metaKey || event.ctrlKey)
+                ) {
+                  event.preventDefault()
+                  toggelWorkplace()
+                }
+              }
+            
 
+          window.addEventListener("keydown", handleKeyDown);
+
+          /**
+           * return ini adalah cleanUp. Ini bertugas akan menghapus fn pertama kali
+           * ketika efect dependency dipanggil untuk kesekian kalinya. Lalu efect ini dijalankankan lagi dan return
+           * akan menunggu jika efect dependency dipanggil selanjutnya;
+           */
+          return () => window.removeEventListener("keydown", handleKeyDown)
+            // if (printArea.current) {
+            //     const styles = window.getComputedStyle(printArea.current);
+                
+            // }
+        }, [toggelWorkplace]);
+
+        // Handle kelas ampu selected
+        const [kelasAmpuSelected, setKelasAmpuSelected] = React.useState<KelasAmpuType | null>(null);
+        const handleKelasAmpuSelected = React.useCallback(
+            (data:KelasAmpuType | null) => {
+              
+                setKelasAmpuSelected(data);
+                if (data) {
+                  Cookies.set('classroom', data.id, { expires: 1 });
+                } else {
+                  Cookies.remove('classroom');
+                }
+                
+                return setKelasAmpuSelected(data);
+              },[setKelasAmpuSelected]
+        );
+        // Jika kelas_ampu tidak ada, maka set kelasAmpuSelected ke null
+        React.useEffect(() => {
+            const savedId = Cookies.get('classroom');
+            if (savedId) {
+              const found = kelas_ampu?.find((d) => d.id === savedId);
+              if (found) {
+                setKelasAmpuSelected(found);
+              }
+            }
+        }, [handleKelasAmpuSelected, kelas_ampu]);
+        
         const workplaceProviderContext = React.useMemo<typeWorkplace>(
             () => ({
                     user,
@@ -121,16 +192,37 @@ function MyWorkplace({
                     openMobile,
                     setOpenMobile,
                     toggelWorkplace,
-                    printArea
+                    printArea,
+                    sekolah,
+                    kop_custom,
+                    kelas_ampu,
+                    peran,
+                    kelasAmpuSelected,
+                    handleKelasAmpuSelected, 
             }),
-            [user, isMobile, state, open, setOpen, openMobile, setOpenMobile, toggelWorkplace,printArea]
-        );
+            [ user, 
+              isMobile, 
+              state, 
+              open, 
+              setOpen, 
+              openMobile, 
+              setOpenMobile, 
+              toggelWorkplace, 
+              printArea,
+              sekolah,
+              kop_custom,
+              kelas_ampu,
+              peran,
+              kelasAmpuSelected,
+              handleKelasAmpuSelected, 
+            ]
+        );  
 
         return (
             <WorkplaceContext.Provider value={workplaceProviderContext}>
                 <div
                     data-slot="background"
-                    className="bg-edurasa bg-fixed bg-no-repeat bg-cover bg-[50%] dark:bg-edurasa-dark"
+                    className="bg-edurasa bg-fixed bg-no-repeat bg-cover bg-[50%] dark:bg-edurasa-dark min-h-screen"
                     style={
                                 {
                                   "--sidebar-width": SIDEBAR_WIDTH,
@@ -142,6 +234,7 @@ function MyWorkplace({
                     >
                         {children}
                 </div>
+                <Toaster/>
             </WorkplaceContext.Provider>
         );
 
@@ -187,18 +280,18 @@ function MyStickyWorkplace({className,...props}:React.ComponentProps<'div'>){
 };
 
 function MySidebar({
-  side = "left",
+  side = "top",
   variant = "sidebar",
   collapsible = "offcanvas",
   className,
   children,
   ...props
 }: React.ComponentProps<"div"> & {
-  side?: "left" | "right"
+  side?: "left" | "right"| "top" | "bottom";
   variant?: "sidebar" | "floating" | "inset"
   collapsible?: "offcanvas" | "icon" | "none"
 }){
-   const { isMobile, state, openMobile, setOpenMobile } = useWorkplace()
+   const { isMobile, state, openMobile,open, setOpenMobile } = useWorkplace()
 
   if (collapsible === "none") {
     return (
@@ -217,7 +310,26 @@ function MySidebar({
 
   if (isMobile) {
     return (
-        null
+        <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+        <SheetHeader className="sr-only">
+          <SheetTitle>Sidebar</SheetTitle>
+          <SheetDescription>Displays the mobile sidebar.</SheetDescription>
+        </SheetHeader>
+        <SheetContent
+          data-sidebar="sidebar"
+          data-slot="sidebar"
+          data-mobile="true"
+          className="bg-sidebar h-[calc(100vh-72px)] text-sidebar-foreground w-full p-0 [&>button]:hidden"
+          style={
+            {
+              "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
+            } as React.CSSProperties
+          }
+          side={side}
+        >
+          <div className="flex h-full w-full flex-col">{children}</div>
+        </SheetContent>
+      </Sheet>
     )
   }
 
@@ -233,7 +345,7 @@ function MySidebar({
       {/* This is what handles the sidebar gap on desktop */}
       <div
         className={cn(
-          "relative h-svh w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear",
+          "relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear",
           "group-data-[collapsible=offcanvas]:w-0",
           "group-data-[side=right]:rotate-180",
           variant === "floating" || variant === "inset"
@@ -244,7 +356,7 @@ function MySidebar({
       />
       <div
         className={cn(
-          "sticky inset-y-0  h-[calc(100vh-48px)]  w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
+          "sticky inset-y-12  min-h-[calc(100vh-114px)]  w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
           side === "left"
             ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
             : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
@@ -258,7 +370,7 @@ function MySidebar({
       >
         <div
           data-sidebar="sidebar"
-          className="bg-sidebar overflow-hidden group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
+          className="bg-sidebar overflow-hidden group-data-[variant=floating]:border-sidebar-border flex  w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
         >
           {children}
         </div>
@@ -273,9 +385,11 @@ function MySidebarTrigger({
         ...props
 
     }:React.ComponentProps<typeof Button>){
-    const { toggelWorkplace, state,open,openMobile} = useWorkplace();
+    const { toggelWorkplace, state,isMobile} = useWorkplace();
+    const CompIcon = isMobile ? AlignJustifyIcon: (state==='expanded'?ChevronsRightLeft : ChevronsLeftRightEllipsis);
 
     return(
+      <WrappingButtonWithTooltip asChild tooltip={{ children: 'Buka tutup Sidebar / tekan CTRL + B', side:'left' }}>
         <Button
             data-slot="button-sidebar-toggle"
             variant={'outline'}
@@ -285,10 +399,11 @@ function MySidebarTrigger({
                 }}
             className="border-1 border-gray-500 bg-transparent font-bold"
         >
-            {state==='expanded'?<ChevronsRightLeft/>:<ChevronsLeftRightEllipsis/>}
+            <CompIcon/>
             <span className="sr-only">Toggle Sidebar</span>
 
         </Button>
+      </WrappingButtonWithTooltip>
     )
 }
 
@@ -412,11 +527,10 @@ function WrappingButtonWithTooltip({
 function ButtonClickPrint({type,children}:React.PropsWithChildren<{type:'protrait'|'landscape'}>){
     const {printArea} = useWorkplace() ;
     const printHandle = useReactToPrint({
-
-                            contentRef: printArea ,
-                            documentTitle: "Dokumen "+type,
-                            pageStyle:`@media print {@page { size: ${type}; margin:16px}}`,
-                        });
+                          contentRef: printArea ,
+                          documentTitle: "Dokumen "+type,
+                          pageStyle:`@page { size: ${type}; margin:16px}`,
+                      });
 
     return (
             <button onClick={printHandle}>{children}</button>
@@ -476,5 +590,6 @@ export {
     MySidebarTrigger,
     DropdownExport,
     WorkplaceSidebarMenuButton,
+    WrappingButtonWithTooltip,
     useWorkplace
 }

@@ -46,8 +46,8 @@ export function WorkplaceSidebarSample({children}:React.PropsWithChildren){
 export default function WorkplaceSidebar({mainSubfitur,optionalSubfitur}:mySidebarProps){
     return(
 
-        <MySidebar collapsible="icon" variant="floating">
-            <SidebarHeader>
+        <MySidebar collapsible="icon" variant="floating" >
+            <SidebarHeader  className="bg-zinc-400 dark:bg-zinc-600">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <WorkplaceSidebarMenuButton size="lg" asChild>
@@ -59,12 +59,12 @@ export default function WorkplaceSidebar({mainSubfitur,optionalSubfitur}:mySideb
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent>
+            <SidebarContent className="bg-zinc-400 dark:bg-zinc-600">
                 <WorkplaceNavMain items={mainSubfitur} />
             </SidebarContent>
 
-            <SidebarFooter>
-                <WorkplaceNavMain items={optionalSubfitur}/>
+            <SidebarFooter className="bg-zinc-400 dark:bg-zinc-600">
+                <WorkplaceNavMain items={optionalSubfitur} main="tutorial"/>
             </SidebarFooter>
         </MySidebar>
     )

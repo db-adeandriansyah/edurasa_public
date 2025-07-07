@@ -34,7 +34,7 @@ function MyHeadingContent({className,children}:React.ComponentProps<'div'>){
                 className
             )}
         >
-            <div className="w-full flex justify-between bg-sky-100/50  dark:bg-sky-800/50 rounded-3xl p-1">
+            <div className="w-full flex justify-between bg-sky-100/50  dark:bg-sky-600/50 rounded-3xl p-1">
                 {children}
             </div>
         </div>

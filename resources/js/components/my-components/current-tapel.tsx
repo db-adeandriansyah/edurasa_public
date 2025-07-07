@@ -1,5 +1,5 @@
 
-type variantCurrentTapel = 'short'|'long';
+type variantCurrentTapel = 'short'|'long'|'full';
 
 function currentTapel({variant='long'}:{variant?:variantCurrentTapel}):string {
     let date = new Date();
@@ -9,6 +9,8 @@ function currentTapel({variant='long'}:{variant?:variantCurrentTapel}):string {
     let semester = date.getMonth()>5?1:2;
     if(variant ==='long'){
         return 'Tapel '+ firstYear +'/' + lastYear +' Semester '+ semester;
+    }else if(variant ==='full'){
+        return 'Tahun Pelajaran '+ firstYear +'/' + lastYear ;//+' Semester '+ semester;
     }
     return firstYear +'/' + lastYear +' ('+ semester+')';
 }

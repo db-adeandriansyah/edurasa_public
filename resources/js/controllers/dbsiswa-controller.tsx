@@ -1,4 +1,6 @@
 import { PrintAreaWithToolbarDefault, ToolbarDefault } from "@/components/templating/workplace-provider-toolbar";
+import { WorkplaceTabsToolbar } from "@/components/templating/workplace-tabs-toolbar";
+import { usePage } from "@inertiajs/react";
 import { useCallback, useState } from "react";
 
 const TestData = [
@@ -19,20 +21,19 @@ const TestData = [
     },
 ]
 function DbsiswaController(){
-    const [valueKlik, setValueKlik] = useState('');
-    const handleClickMe = useCallback(
-        ()=> {
-        setValueKlik(()=>valueKlik===""?'Klik Me Show':"")
-    }
-        ,[valueKlik]);
+    
     return(
         <>
-            <ToolbarDefault>
-                <button onClick={handleClickMe} className="border-1 border-amber-300 rounded-3xl">Klik Me</button>
-            </ToolbarDefault>
+            {/* <ToolbarDefault/> */}
+            <WorkplaceTabsToolbar useKopTtd={true} tabs={[
+                {
+                    title:'hello',
+                    content:<p>Hello World</p>
+                }
+            ]} defaultValue="kopttd"/>
+                
             <PrintAreaWithToolbarDefault>
-                {valueKlik}
-                <hr/>
+                
                 <ul>
                     {TestData.map((item, key)=>{
                         return (<li key={key}>{item.id} = {item.name}</li>)

@@ -2,7 +2,8 @@ import * as React from "react"
 import { CompPrintArea, WorkplaceToolbar, WorkplaceYourContent } from "./workplace-control-printarea"
 import { useWorkplace } from "../my-ui/my-workplace"
 import {type User } from '../../types/index';
-import { dataKop, propsKop, WorkplaceResolverKop } from "./workplace-resolver-kop";
+import { dataKop, handleTypeKop } from "./workplace-resolver-kop";
+import { WorkplaceResolverTtd } from "./workplace-resolver-ttd";
 
 
 type typeContextValueToolbar ={
@@ -29,7 +30,7 @@ function ToolbarDefaultProvider({
 
 }>){
     const [stateKop, setStateKop] = React.useState('');
-    const [stateTtd, setStateTtd] = React.useState('');
+    const [stateTtd, setStateTtd] = React.useState('none');
     //sediakan data user;
     const {user} = useWorkplace()
 
@@ -38,15 +39,16 @@ function ToolbarDefaultProvider({
             setStateKop(value);
         },
         [stateKop,setStateKop]
-
     );
 
-    const onHandleStateTtd = React.useCallback((value:string)=>{
-        setStateTtd(value);
-        },
+    const onHandleStateTtd = React.useCallback(
+        (value:string)=> {
+            setStateTtd(value);
+            }, 
         [stateTtd, setStateTtd]
-            )
-            console.log('state di provider', stateKop);
+    );
+
+        
     const contextToolbarValue  = React.useMemo<typeContextValueToolbar>(
         ()=>(
             {
@@ -71,9 +73,10 @@ function ToolbarDefaultProvider({
 
 function ToolbarDefault({children}:React.PropsWithChildren){
     const {stateKop, onHandleStateKop, stateTtd, onHandleStateTtd} = useDefaultToolbarContext();
-    console.log('toolbarDefault', stateKop)
+    
     return (
         <WorkplaceToolbar
+            
             value={stateKop}
             onValueChange={onHandleStateKop}
             valueTtd = {stateTtd}
@@ -84,35 +87,28 @@ function ToolbarDefault({children}:React.PropsWithChildren){
     )
 }
 
-function handleTypeKop({tipe,data}:{tipe:string, data:dataKop}){
-    switch (tipe){
-        case 'tipe_1':
-            return WorkplaceResolverKop({type:'dua',data});
-            break
-        case 'tipe_2':
-            return WorkplaceResolverKop({type:'tiga',data});
-        case 'tipe_3':
-            return WorkplaceResolverKop({type:'tiga',data});
-        default:
-            return;
-    }
-}
-
 function PrintAreaWithToolbarDefault({children}:React.PropsWithChildren){
-    const {stateKop, stateTtd,user} = useDefaultToolbarContext();
-
-
-console.log(user.name)
+    const {stateKop, stateTtd} = useDefaultToolbarContext();
+    const {sekolah,kop_custom} = useWorkplace();
+    const CompKop = handleTypeKop(stateKop, {
+                    sekolah:sekolah,
+                    kop_surat:kop_custom 
+                } as dataKop
+            );
+    const CompTtd = WorkplaceResolverTtd(stateTtd);
     return (
         <CompPrintArea>
-            {stateKop}
+            {CompKop}
+            
 
             {children}
 
-            {stateTtd}
+            {CompTtd}
         </CompPrintArea>
     )
 }
+
+
 export {
     useDefaultToolbarContext,
     ToolbarDefaultProvider,

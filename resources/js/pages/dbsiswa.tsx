@@ -8,10 +8,6 @@ export default function Dbsiswa(){
         <DbSiswaTemplate title="Database Siswa">
             <Head title="Database Siswa"/>
             <DbsiswaController/>
-            {/* <h1 className="font-semibold">Hello Db Siswa</h1>
-            <p className="text-red-500">Hello Red</p>
-            <img src={logo}/>
-            <img src="https://lh3.googleusercontent.com/d/15gz7k42prJhAgBIjIwhaGKkRVx7qLBG5" className="size-24 bg-fixed rounded-full"/> */}
         </DbSiswaTemplate>
     )
 }

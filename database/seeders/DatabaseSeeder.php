@@ -2,8 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\Ptk;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Database\Seeders\PtkSeeder;
+use Database\Seeders\RolePermisionSeeder;
+use Database\Seeders\SiswaSeeder;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -18,6 +22,12 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'password' => bcrypt('password'),
         ]);
+
+        $this->call(RolePermisionSeeder::class );
+        $this->call(SchoolSeeder::class);
+
+      
     }
 }
