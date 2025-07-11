@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class UserResourceCollection extends ResourceCollection
@@ -47,7 +48,8 @@ class UserResourceCollection extends ResourceCollection
     public function paginationInformation(Request $request, $paginated, $default)
     {
         //  $default['links']['first'] = 'http://edurasa_public.test/approval-akun';
-        $pathCustom = 'http://edurasa_public.test/approval-api';
+        // $pathCustom = 'http://edurasa_public.test/approval-api';
+        $pathCustom = env('APP_URL').'/approval-api';
         // custom links yang ada di meta;
         $customLinksUrl = [];//array_map(function());
 
@@ -55,7 +57,7 @@ class UserResourceCollection extends ResourceCollection
         $linksUrl = $default['meta']['links'];
         // dd($linksUrl);
         foreach ($linksUrl as $key =>$value) {
-            $parambefore = parse_url($value['url'], PHP_URL_QUERY);
+            $parambefore = parse_url($value['url'], component: PHP_URL_QUERY);
             $myCustomLink =  $pathCustom . '?'. $parambefore;
             if($value['url'] === null) {
                 $myCustomLink = null;

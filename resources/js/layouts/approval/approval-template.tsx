@@ -13,7 +13,7 @@ const subfitur:NavItem[] =[
     },
     {
         title: 'Daftar Akun',
-        href: '/approval-akun',
+        href: '/daftar-akun',
         icon: UserCheck,
     },
     {

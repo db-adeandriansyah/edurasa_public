@@ -26,7 +26,7 @@ export default function WorkplaceShell({title, children,showRoom,showPrintable,t
     return(
         <MyWorkplace>
             <WorkplaceHeader/>
-            <MyContentWorkplace className="shadow-lg bg-gray-50/50 backdrop-blur-[70px]/50 min-h-full">
+            <MyContentWorkplace className="shadow-lg bg-gray-50/50 backdrop-blur-[70px]/50 ">
                 <WorkplaceSticky 
                     title = {title} 
                     isShowRoom= {showRoom} 

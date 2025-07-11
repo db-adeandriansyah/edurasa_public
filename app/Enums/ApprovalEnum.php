@@ -13,6 +13,8 @@ enum ApprovalEnum: string
     // enum ketika akun telah dihapus oleh admin
     case DELETED = 'deleted';       
     // enum ketika akun telah dihapus oleh admin
-    case BLOCKED = 'blocked';
+    case BLOCKED = 'blocked';       
+    // enum ketika akun telah diterima oleh admin
+    case APPROVE = 'approve';
     
 }

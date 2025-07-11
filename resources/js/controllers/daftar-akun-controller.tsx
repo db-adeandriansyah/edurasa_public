@@ -9,7 +9,7 @@ import { usePage } from "@inertiajs/react";
 
 import { useCallback, useMemo, useState } from "react";
 
-export default function ApprovalController({
+export default function DaftarAkunController({
         paginationHeaderLabel,
         paginationColumnKey,
         // fieldsTemplate,
@@ -26,6 +26,8 @@ export default function ApprovalController({
         // const {data  as ApprovalData } = usePage<SharedData>().props;
         const [configTable, setConfigTable] = useState<TableConfigPaginationProps<ApprovalData>>({
                 dataawal: data,
+                addSearch:true,
+                addButton:true,
                 refFindData: 'user_id'
             });
         

@@ -51,14 +51,12 @@ class UserResource extends JsonResource
             //  }), 
             //-----------
             'data_profile' => $this->whenLoaded('profile', function () {
-
                 return match($this->profile->profilable_type) {
                     'App\Models\Ptk' => new PtkResource($this->profile->profilable),
                     'App\Models\Siswa' => new SiswaResource($this->profile->profilable),
                     default => null,
                 };
             }),
-
             'data_sekolah' => $this->whenLoaded('profile', function () {
                 return $this->profile->profilable->schools
                     ->map(function ($school) {
@@ -74,8 +72,9 @@ class UserResource extends JsonResource
                         }) ;
                         
                     })?->first() ,
-            'log_approval' => $this->when(
-                $this->relationLoaded('logApproval'),fn()=>$this->logApproval
+            'log_approval'=> $this->whenLoaded('logApproval', fn()=>$this->logApproval),
+            'permissions' => $this->when(
+                $this->relationLoaded('roles'),fn()=>$this->getAllPermissions()->pluck('name')
             )
         ];
     }

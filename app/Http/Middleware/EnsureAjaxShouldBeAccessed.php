@@ -18,10 +18,10 @@ class EnsureAjaxShouldBeAccessed
        
         
         if (!$request->ajax()) {
-            return response()->json([
-                    'message' => 'This endpoint is only accessible via AJAX.',
-                ], 403);
-                // return abort(403,'Ga boleh diakses kecuali dengan Ajax');
+            // return response()->json([
+            //         'message' => 'This endpoint is only accessible via AJAX.',
+            //     ], 403);
+                return abort(403,'Ga boleh diakses kecuali dengan Ajax');
             }
         // if ($request->header('X-Requested-With') !== 'XMLHttpRequest') {
         //     // dd($request->header());

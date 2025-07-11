@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Services\UseCase\UserApprovalPendingService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,9 +14,10 @@ class AppServiceProvider extends ServiceProvider
     {
         //
         $this->app->bind(
-            'App\Interfaces\UserInterface',
-            'App\Repositories\UserRepository'
+            'App\Interfaces\UserRepositoryInterface', 'App\Repositories\UserRepository'
         );
+        
+        $this->app->singleton(UserApprovalPendingService::class);
     }
 
     /**

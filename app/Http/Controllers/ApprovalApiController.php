@@ -4,20 +4,22 @@ namespace App\Http\Controllers;
 
 use Inertia\Controller;
 use Illuminate\Http\Request;
+
+
 use App\Services\UserService;
-use App\Http\Resources\UserResource;
 use App\Http\Resources\UserResourceCollection;
+use App\Services\UseCase\UserApprovalPendingService;
 
 class ApprovalApiController extends Controller
 {
-    public function index(Request $request, UserService $service)
+    public function index(Request $request, UserApprovalPendingService $fetchPaginatedUsersUseCase)
     {
-        
-        $params = $request->only(['page', 'per_page', 'search']);
+        $asli = $fetchPaginatedUsersUseCase->execute(
+            $request->query()
+        );
 
-        $asli = $service->getPaginatedUsers($params);
-
-        
         return new UserResourceCollection($asli);
     }
+
+    
 }

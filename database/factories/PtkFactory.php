@@ -88,6 +88,14 @@ class PtkFactory extends Factory
                         'password' => Hash::make('password'),
                     ]);
                     $user->assignRole(Peran::GURU_MAPEL->value);
+                    $user->LogApproval()->create([
+                        'user_id' => $user->id,
+                        'status' => ApprovalEnum::PENDING->value,
+                        'description' => 'Pertama kali PTK dibuatkan akun',
+                        'evidence_url' => null,
+                        'evidence_type' => null,
+                        'evidence_source' => null,
+                    ]);
                     return [
                         'user_id' => $user->id,
                         'profilable_type' =>$ptk->type,

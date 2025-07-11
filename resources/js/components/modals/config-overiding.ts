@@ -68,7 +68,7 @@ export const ModalConfigProps: ModalCustomInterface =  {
  * @returns ModalCustomInterface
  */
 export function createModalConfig( override: Partial<ModalCustomInterface> ): ModalCustomInterface {
-    console.log('harus immutable',ModalConfigProps,'\n override', override);
+    
     return {
         ...ModalConfigProps,
         ...override,

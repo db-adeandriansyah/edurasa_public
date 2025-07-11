@@ -8,17 +8,15 @@ import { useApi } from "@/hooks/use-api";
 import { apiGet, FetchOptions} from "@/lib/api";
 import { TableDefault, TBodyComponent, TdComponent, TdHeadComponent, TheadComponent, TrComponent, WrapperTablePagination } from "./my-table";
 import { Input } from "../ui/input";
-import { FieldProps, ModalInTablePagination } from "./modal-in-table-pagination";
 import { crudAction } from "@/types";
 import { ModalCustomInterface } from "../modals/type";
 import { ModalByConfig } from "../modals/modal-by-config";
+import { getValueByPath } from "../modals/fields/helper-modal";
 
 
 // import axios from "axios";
 
 interface TableConfigPaginationProps<T> {
-    // columnsSel: TheadType[],//ColumnsHeaderType;
-    // columnsKey : ThRefrencesType[] ;
     dataawal : DataPaginationType<T>;
     addButton?:boolean;
     addSearch?:boolean;
@@ -41,7 +39,6 @@ function TablePagination<T>({
     modeCrud,
     setModeCrud,
     editModal,
-    fieldsTemplate,
     configModal,
     ...props
     }:React.ComponentProps<'table'> & {
@@ -50,7 +47,6 @@ function TablePagination<T>({
         columnsKey: ThRefrencesType[],
         showModal: boolean,
         setShowModal:React.Dispatch<React.SetStateAction<boolean>>
-        fieldsTemplate: FieldProps[],
         dataModal?: T|undefined,
         setDataModal?:React.Dispatch<React.SetStateAction<T|undefined>>
         editModal?: ()=>void;
@@ -71,6 +67,7 @@ function TablePagination<T>({
         const [dataRow, setDataRow] = React.useState<T[]>(data);
         const [dataLinks, setDataLink] = React.useState<LinkPaginationType>(links);
         const [dataMeta, setDataMeta] = React.useState<MetaPaginatonType>(meta);
+        
         /** semua setState disini akan dieksekusi via useCallback
          * alasannya karena kita akan cache setState-nya sebagai fungsi yang tetap;
          * Lalu, nilai awal akan dipanggil/dikelola di useMemo.
@@ -88,12 +85,8 @@ function TablePagination<T>({
             return defineCountButtonPapge(dataMeta.last_page,dataMeta.current_page);
             ;
         },[dataMeta]);
-        /**
-         * show modal
-         */
-        // const [showModal, setShowModal] = React.useState(false);
-
-        const fetchData= React.useCallback(
+        
+        const fetchData = React.useCallback(
 
             () =>{
                 if(!dataCurrentPage) return;
@@ -103,7 +96,8 @@ function TablePagination<T>({
                     params: dataParam
                 }
 
-                return request(() => apiGet(route('approval-api'), dataFetcth,false), {
+                // return request(() => apiGet(route('approval-api'), dataFetcth,false), {
+                return request(() => apiGet(dataMeta.path, dataFetcth,false), {
                             successMessage: 'Berhasil memuat data',
                             errorMessage: 'Gagal memanggil data.',
                             onSuccess: (r) => {
@@ -117,7 +111,7 @@ function TablePagination<T>({
                                     setDataMetaLinks(r.meta.links)
                                 },
                             onError:(err)=>{
-                                // console.log(err);
+                                
                                 setDataRow([]);
                                 setDataTotal(0);
                                 setDataMetaLinks([]);
@@ -145,7 +139,7 @@ function TablePagination<T>({
         }
 
         function onHandleCountPage(value:string){
-            console.log('handleCountPage dipanggil');
+            
             const numb = Number(value);
             setDataCurrentPage(1);
             setDataPerPage(numb);
@@ -156,24 +150,37 @@ function TablePagination<T>({
         }
         
         const onHandleChangeSearch= (value:string)=>{
-            console.log('search dipanggil');
+                
                 if(value ===""){
                     dataCurrentPage?? setDataCurrentPage(1);
                     setDataParam(prev=>({
                         'page': dataCurrentPage,
-                        // per_page: dataPerPage,
+                        
                     }));
                     setDataSearch('');
                 }else{
-                    dataCurrentPage?? setDataCurrentPage(1);
-                    setDataParam(prev=>({
-                        ...prev,
-                        'page':1,//dataCurrentPage,
-                        'search': value,
-                    }));
                     setDataSearch(value);
                 }
             };
+        const handleClickSearch = React.useCallback(()=>{
+            
+            if(dataSearch===""){
+                
+                    setDataParam(prev=>({
+                        'page': dataCurrentPage,
+                        
+                    }));
+            }else{
+                dataCurrentPage?? setDataCurrentPage(1);
+                setDataParam(prev=>({
+                    ...prev,
+                    'page':1,//dataCurrentPage,
+                    'search': dataSearch,
+                }));
+
+            }
+            
+        },[dataSearch,setDataSearch])
         // 
         const handleShowModal = React.useCallback((e:React.MouseEvent<HTMLButtonElement>)=>{
             const currentData = dataRow.find(s => (s as Record<string, any>)[findId] == e.currentTarget.dataset.id);
@@ -182,26 +189,28 @@ function TablePagination<T>({
             setDataModal?.(currentData);  
             setModeCrud?.(datasetMode );
             setShowModal(!showModal);
-            // console.log(currentData, dataModal);
+            
         },[dataRow]);
+        
         return (
             <>
-            
                 <WrapperPagination className="border-t-0 mb-2">
                         {
                             addSearch && (
-                                <div className="relative w-full">
-                                    <Search className="absolute top-0 translate-y-2 left-1 text-gray-400 size-5"/>
-                                    <Input 
-                                        value={dataSearch} 
-                                        type="text" 
-                                        onChange={(e)=>onHandleChangeSearch(e.target.value)} 
-                                        tabIndex={0}
-                                        placeholder="cari berdasarkan kolom yang ada di dalam tabel"
-                                        className="py-0 indent-3"
-                                        />
+                                <div className="flex gap-2 w-1/2">
+                                    <div className="relative w-full">
+                                        <Search className="absolute top-0 translate-y-2 left-1 text-gray-400 size-5"/>
+                                        <Input 
+                                            value={dataSearch} 
+                                            type="text" 
+                                            onChange={(e)=>onHandleChangeSearch(e.target.value)} 
+                                            tabIndex={0}
+                                            placeholder="cari berdasarkan kolom yang ada di dalam tabel"
+                                            className="py-0 indent-3"
+                                            />
+                                    </div>
+                                    <Button onClick={handleClickSearch}>Cari</Button>
                                 </div>
-                            
                             )
                         }
                         {
@@ -209,7 +218,6 @@ function TablePagination<T>({
                                 <Button variant={'outline'}>Tambah Data</Button>
                             )
                         }
-                        
                 </WrapperPagination>
                 <WrapperTablePagination>
                         <TableDefault>
@@ -224,7 +232,6 @@ function TablePagination<T>({
                                                             <TdHeadComponent 
                                                                 key={indexHeader} 
                                                                 rowSpan = {header.rowSpan}
-                                                                
                                                             >
                                                                 {header.label}
                                                             </TdHeadComponent>
@@ -243,7 +250,6 @@ function TablePagination<T>({
                                                 <TrComponent key={index}>
                                                     {
                                                         columnsKey.map((col,i)=>{
-
                                                             if(!col.key){
                                                                 
                                                                 return <TdComponent className={col.className} key={i+index}/>
@@ -257,20 +263,16 @@ function TablePagination<T>({
                                                                             resolveButtonAction(col?.actionKeyType as typeActionKey, handleShowModal, getValueByPath(dataItem, String(col?.actionKey)))
                                                                         }
                                                                         </TdComponent>
-                                                                
                                                             }else{
                                                                 
                                                                 return <TdComponent className={col.className}  key={i+index}>{getValueByPath(dataItem, col.key)}</TdComponent>
                                                             }
                                                         })
                                                     }
-                                                    
                                                 </TrComponent>
                                                 )
-                
                                         }
                                     )
-                                    
                                 }
                             </TBodyComponent>
                         </TableDefault>
@@ -283,7 +285,6 @@ function TablePagination<T>({
                         <SelectCountPage 
                             value={dataPerPage??20} 
                             onChangeValue={onHandleCountPage}
-                            
                             />
                     </div>
                     <div className="grid grid-cols-6 md:flex text-xs border-b-1 border-t-1 rounded-lg">
@@ -292,21 +293,16 @@ function TablePagination<T>({
                         {
                             buttonPage.map((btn:string|number,index:number)=>{
                                 const getUrlPage = dataMetaLinks.find(s=>s.label == btn);
-    
                                 if(!getUrlPage){
                                     return (<span className="py-0 h-5 align-middle px-3" key={index}>{btn}</span>);
                                 }
-                                
                                 return (<Button key={index} className={`text-xs h-5 px-2 py-0 ${getUrlPage.active?'bg-sky-400':''}`} variant={'ghost'} type="button" onClick={onChangePage} data-url={getUrlPage.url} disabled={!getUrlPage.url}>{btn}</Button>)
                             })
                         }
                         <Button className="text-xs py-0 h-5" variant={'ghost'} type="button" onClick={onChangePage} data-url={dataLinks?.next} disabled={!dataLinks?.next}><ArrowRight/></Button>
                         <Button className="text-xs py-0 h-5" variant={'ghost'} type="button" onClick={onChangePage} data-url={dataLinks?.last} disabled={!dataLinks?.last}>Akhir</Button>
                     </div>
-                        
-                    
                 </WrapperPagination>
-                
                     <ModalByConfig 
                         className="md:min-w-3xl"
                         title = {modeCrud??configModal.mode}
@@ -321,10 +317,12 @@ function TablePagination<T>({
                         onAdd = {configModal.onAdd??undefined}
                         messageDelete={configModal.messageDelete}
                         contentTabHeaders={configModal.contentTabHeaders}
+                        contentTabHeadersOnly={configModal.contentTabHeadersOnly}
                         polymorphicFields={configModal.polymorphicFields}
                         onUpdate={configModal.onUpdate}
                         onDelete={configModal.onDelete}
-                        closeOnOutsideClick={false}
+                        closeOnOutsideClick={configModal.closeOnOutsideClick}
+                        interactiveField = {configModal.interactiveField}
                     />
             </>
     );
@@ -350,10 +348,7 @@ function resolveButtonAction(type:typeActionKey, handleClick:(e: React.MouseEven
             return <Button data-mode = "delete" data-id={dataId} className="p-0  has-[>svg]:p-0 bg-red-400 size-5"  onClick={handleClick} asChild><Trash /></Button>
     }
 }
-function getValueByPath(obj: any, path: string) {
-    if(path==="") return "";
-    return path.split('.').reduce((acc, part) => acc && acc[part], obj);
-}
+
 function defineCountButtonPapge(lastPages:number, currentPage:number){
     const static_middle_page = lastPages - 4;
 
@@ -387,6 +382,7 @@ function defineCountButtonPapge(lastPages:number, currentPage:number){
         lastPages
     ]
 }
+
 function WrapperPagination({ className, children , ...props}:React.ComponentProps<'div'>) {
     return ( 
         <div className={cn("flex justify-between mt-2 border-t-2 gap-2", className)}
@@ -403,7 +399,6 @@ function SelectCountPage({value,onChangeValue}:{value:number,onChangeValue:(valu
                     
                 <SelectTrigger 
                     className="w-16 h-7 py-0 text-xs border-b-1 border-t-1 rounded-xl focus-visible:border-0 focus-visible:transparent"
-                    
                     >
                     <SelectValue className="py-0" placeholder='Show'></SelectValue>
                 </SelectTrigger>
@@ -414,9 +409,9 @@ function SelectCountPage({value,onChangeValue}:{value:number,onChangeValue:(valu
                     <SelectItem className="text-xs" value="100">100</SelectItem>
                 </SelectContent>
             </Select>
-        
     )
 }
+
 export {
     TablePagination,
     type TableConfigPaginationProps

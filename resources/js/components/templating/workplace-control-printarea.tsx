@@ -168,7 +168,7 @@ function WorkplaceYourContent({className,...props}:ComponentProps<'div'>){
     return (
         <div
             data-slot="workplace-your-content" 
-            className={cn("flex flex-1 flex-col border-s-1 border-black mt-1",
+            className={cn("flex flex-1 flex-col border-s-1 border-black mt-1 overflow-x-auto",
             className
             )}
             {...props}

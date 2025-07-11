@@ -2,15 +2,16 @@
 
 namespace Database\Seeders;
 
-use App\Models\Permission ;//as ModelsPermission;
-use App\Models\Profilable;
 use App\Models\Ptk;
+use App\Enums\Peran;
 use App\Models\Role;
 use App\Models\User;
-use App\Enums\Peran;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder as Seeder;
+use App\Models\Profilable;
+use App\Enums\ApprovalEnum;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Seeder as Seeder;
+use App\Models\Permission ;//as ModelsPermission;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 // use Spatie\Permission\Models\Permission;
 
@@ -43,11 +44,14 @@ class RolePermisionSeeder extends Seeder
             'name' => 'User Guru',
             'email' => 'gurukelas@example.com',
             'password' => Hash::make('password'),
+            
+            'state_approval' => ApprovalEnum::APPROVE->value
         ]);
         $user_admin =User::create([
             'name' => 'User Admin',
             'email' => 'admin@example.com',
             'password' => Hash::make('password'),
+            'state_approval' => ApprovalEnum::APPROVE->value
         ]);
 
         $user_gk->assignRole($g_k);
@@ -58,6 +62,8 @@ class RolePermisionSeeder extends Seeder
             'name' => 'User Has Profil',
             'email' => 'userhasprofile@example.com',
             'password' => Hash::make('password'),
+            
+            'state_approval' => ApprovalEnum::APPROVE->value
         ]);
         
         //tambahkan peran

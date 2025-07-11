@@ -2,8 +2,11 @@
 
 namespace App\Interfaces;
 
-use Illuminate\Contracts\Database\Eloquent\Builder as EloquentBuilder;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Database\Eloquent\Builder as EloquentBuilder;
 
 interface UserInterface
 {
@@ -23,14 +26,24 @@ interface UserInterface
     
 
 
-    //method untuk mendapatkan data user
-    public function getUserData():Builder;
+    // //method untuk mendapatkan data user
+    // public function getUserData():Builder;
 
-    //method untuk mendapatkan data ptk
-    public function getPtkData();  
+    // //method untuk mendapatkan data ptk
+    // public function getPtkData();  
     
-    public function paginateWithSearch(int $perPage, int $page, ?string $search);
+    // public function paginateWithSearch(int $perPage, int $page, ?string $search);
 
+    // public function getAllUsers(): Collection;
+    // public function getUsersWithRelations(array $relations = []): Collection; // <-- Tambahan
 
+    
+    // public function findUserById(int $id): ?User;
+    // public function findUserByIdWithRelations(int $id, array $relations = []): ?User; // <-- Tambahan
+    // public function createUser(array $data): User;
+    // public function updateUser(int $id, array $data): ?User;
+    // public function deleteUser(int $id): bool;
+
+    public function getAllUsersWithRelatedPaginations(int $perPage, int $page, ?string $search): LengthAwarePaginator;
 
 }
