@@ -9,15 +9,18 @@ import { apiGet, FetchOptions} from "@/lib/api";
 import { TableDefault, TBodyComponent, TdComponent, TdHeadComponent, TheadComponent, TrComponent, WrapperTablePagination } from "./my-table";
 import { Input } from "../ui/input";
 import { crudAction } from "@/types";
-import { ModalCustomInterface } from "../modals/type";
-import { ModalByConfig } from "../modals/modal-by-config";
+// import { ModalCustomInterface } from "../modals/type";
+// import { ModalByConfig } from "../modals/modal-by-config";
 import { getValueByPath } from "../modals/fields/helper-modal";
+import { ModalCustomInterface } from "../interactive-modals/interfaces/type";
+import ModalByConfig from "../interactive-modals/modal-by-config";
+import { AkunRegisteredByAdmin } from "@/models/approval-user-data";
 
 
 // import axios from "axios";
 
-interface TableConfigPaginationProps<T> {
-    dataawal : DataPaginationType<T>;
+interface TableConfigPaginationProps<T1> {
+    dataawal : DataPaginationType<T1>;
     addButton?:boolean;
     addSearch?:boolean;
     refFindData?:string;
@@ -27,44 +30,71 @@ interface paramPagination{
     per_page? : number,
     search? : string
 }
-function TablePagination<T>({
+function TablePagination<T1, T2 = T1>({
     configTable,
     className, 
     columnsSel,
     columnsKey,
     showModal,
     setShowModal,
-    dataModal,
-    setDataModal,
+    //--->problemCode
+    // dataModal,
+    // setDataModal,
+    //---
     modeCrud,
     setModeCrud,
-    editModal,
+    
     configModal,
+    configModalAddModeCrud,
+    //---
+    // newDataModal,
+    // setNewDataModal,
+    newAddDataForm,
+    //----
+    currentData, 
+    setCurrentData,
     ...props
     }:React.ComponentProps<'table'> & {
-        configTable:TableConfigPaginationProps<T>,
+        /** setting layout table and his data */
+        configTable:TableConfigPaginationProps<T1>,
+        /** setting columnSel format in table header */
         columnsSel: TheadType[],
+        /** refrences key for define value according this source data, source data come from 'configTable' on property 'data' */
         columnsKey: ThRefrencesType[],
+        /** state open/close modal */
         showModal: boolean,
+        /** setter state open/close modal */
         setShowModal:React.Dispatch<React.SetStateAction<boolean>>
-        dataModal?: T|undefined,
-        setDataModal?:React.Dispatch<React.SetStateAction<T|undefined>>
-        editModal?: ()=>void;
+        /** state Crud on mode modal, include for add, edit/update, or delete */
         modeCrud? : crudAction;
+        /** setter state crud on model */
         setModeCrud?: React.Dispatch<React.SetStateAction<crudAction|undefined>>
+        /** setting modal, especially for edited. Currentdata retrieve from filtering/finding in source data (configtable.data) */
         configModal: ModalCustomInterface
+        /** setting modal especially for add data. Its difference on configModal which retrieve from external data, this config has attributes for be sended to external */
+        configModalAddModeCrud?: ModalCustomInterface;
+        /** formating empty data */
+        newAddDataForm?:T2
+        /** state current data that showing on modal. It retrieve from newAddDataForm (modeCrud: add) or retrieve from filtering external data*/
+        currentData?:T1|T2|undefined , 
+        /** setter state currentData. */
+        setCurrentData?:React.Dispatch<React.SetStateAction<T1|T2|undefined>>
     }
     ){
         const addButton = configTable.addButton;
         const addSearch = configTable.addSearch;
         const findId = configTable?.refFindData as string;
+        const defaultModalContentType = configModal;
+        const defaultModalContentTypeAddMode = configModalAddModeCrud as ModalCustomInterface;
+        const [stateConfigModal, setStateConfigModal] = React.useState(defaultModalContentType);
+        const [titleModal, setTitleModal] = React.useState('');
         
         /** Data Pagination 
          * Semua hal terkait action dan handler akan terjadi di sini, tingkat atas hanya sebagai pengirim render utama
         */
         const {request, loading} = useApi();
         const {data, links, meta} = configTable.dataawal;
-        const [dataRow, setDataRow] = React.useState<T[]>(data);
+        const [dataRow, setDataRow] = React.useState<T1[]>(data);
         const [dataLinks, setDataLink] = React.useState<LinkPaginationType>(links);
         const [dataMeta, setDataMeta] = React.useState<MetaPaginatonType>(meta);
         
@@ -76,53 +106,45 @@ function TablePagination<T>({
         const [dataCurrentPage, setDataCurrentPage] = React.useState<number>();
         const [dataSearch, setDataSearch] = React.useState<string>('');
         const [dataFrom, setDataFrom] = React.useState<number>(1);
-        const [dataTotal, setDataTotal] = React.useState<number>(data.length);
-        
+        const [dataTotal, setDataTotal] = React.useState<number>(meta.total);
         const [dataMetaLinks, setDataMetaLinks] = React.useState<LinkUrlPagination[]|[]>(meta.links);
         const [dataParam, setDataParam] = React.useState<paramPagination>({})
         /** selesai mengurusi setState */
+
         const buttonPage = React.useMemo(()=>{
             return defineCountButtonPapge(dataMeta.last_page,dataMeta.current_page);
             ;
         },[dataMeta]);
         
         const fetchData = React.useCallback(
-
             () =>{
                 if(!dataCurrentPage) return;
-                
                 
                 const dataFetcth:FetchOptions ={
                     params: dataParam
                 }
 
-                // return request(() => apiGet(route('approval-api'), dataFetcth,false), {
                 return request(() => apiGet(dataMeta.path, dataFetcth,false), {
-                            successMessage: 'Berhasil memuat data',
-                            errorMessage: 'Gagal memanggil data.',
-                            onSuccess: (r) => {
-                                    setDataRow(r.data);
-                                    setDataLink(r.links);
-                                    setDataMeta(r.meta);
-                                    setDataFrom(r.meta.from);
-                                    setDataPerPage(r.meta.per_page);
-                                    setDataTotal(r.meta.total);
-                                    
-                                    setDataMetaLinks(r.meta.links)
-                                },
-                            onError:(err)=>{
-                                
-                                setDataRow([]);
-                                setDataTotal(0);
-                                setDataMetaLinks([]);
-                                
-                            }
+                    successMessage: 'Berhasil memuat data',
+                    errorMessage: 'Gagal memanggil data.',
+                    onSuccess: (r) => {
+                            setDataRow(r.data);
+                            setDataLink(r.links);
+                            setDataMeta(r.meta);
+                            setDataFrom(r.meta.from);
+                            setDataPerPage(r.meta.per_page);
+                            setDataTotal(r.meta.total);
+                            setDataMetaLinks(r.meta.links)
+                        },
+                    onError:(err)=>{
+                        setDataRow([]);
+                        setDataTotal(0);
+                        setDataMetaLinks([]);
+                    }
                 });
-            
             },
-            [ dataParam]
+            [dataParam]
         ) 
-
         
         React.useEffect(()=>{
             fetchData();
@@ -139,8 +161,8 @@ function TablePagination<T>({
         }
 
         function onHandleCountPage(value:string){
-            
             const numb = Number(value);
+
             setDataCurrentPage(1);
             setDataPerPage(numb);
             setDataParam((prev)=>({ ... prev, 
@@ -150,18 +172,17 @@ function TablePagination<T>({
         }
         
         const onHandleChangeSearch= (value:string)=>{
-                
                 if(value ===""){
                     dataCurrentPage?? setDataCurrentPage(1);
                     setDataParam(prev=>({
                         'page': dataCurrentPage,
-                        
                     }));
                     setDataSearch('');
                 }else{
                     setDataSearch(value);
                 }
             };
+
         const handleClickSearch = React.useCallback(()=>{
             
             if(dataSearch===""){
@@ -181,15 +202,34 @@ function TablePagination<T>({
             }
             
         },[dataSearch,setDataSearch])
-        // 
+        
         const handleShowModal = React.useCallback((e:React.MouseEvent<HTMLButtonElement>)=>{
             const currentData = dataRow.find(s => (s as Record<string, any>)[findId] == e.currentTarget.dataset.id);
             const datasetMode =  e.currentTarget.dataset.mode as crudAction;
-
-            setDataModal?.(currentData);  
+            
             setModeCrud?.(datasetMode );
             setShowModal(!showModal);
             
+            if(datasetMode === 'add'){
+                setStateConfigModal(defaultModalContentTypeAddMode);
+                if(stateConfigModal.defineTitle){
+                    setTitleModal(()=>(stateConfigModal as {defineTitle:(param?:string)=>string})?.defineTitle());
+                }else{
+                    setTitleModal(datasetMode);
+                }
+
+                setCurrentData?.(newAddDataForm as T2);
+
+            }else{
+                setStateConfigModal(defaultModalContentType);
+                setCurrentData?.(currentData); 
+
+                if(datasetMode === 'edit'){
+                    setTitleModal('Edit '+ ((currentData as { name: string })?.name));
+                }else if(datasetMode === 'delete'){
+                    setTitleModal('Konfirmasi Hapus?');
+                }
+            }
         },[dataRow]);
         
         return (
@@ -215,12 +255,12 @@ function TablePagination<T>({
                         }
                         {
                             addButton && (
-                                <Button variant={'outline'}>Tambah Data</Button>
+                                <Button variant={'outline'} data-mode="add" onClick={handleShowModal}>Tambah Data</Button>
                             )
                         }
                 </WrapperPagination>
                 <WrapperTablePagination>
-                        <TableDefault>
+                        <TableDefault className={className}>
                             <TheadComponent>
                                 {
                                     columnsSel.map((column, index) => {
@@ -256,6 +296,10 @@ function TablePagination<T>({
                                                             }else if(col.key === 'index'){
                                                                 
                                                                 return <TdComponent className={col.className}  key={i+index}>{index+dataFrom}</TdComponent>
+                                                            }else if(col.key === 'callback'){
+                                                                const param= getValueByPath(dataItem, col.actionKey as string);
+                                                                const result = col.isCallback?.(param)
+                                                                return <TdComponent className={col.className}  key={i+index}>{result}</TdComponent>
                                                             }else if(col.key ==='action'){
                                                                 
                                                                 return <TdComponent className={col.className}  key={i+index}>
@@ -270,7 +314,7 @@ function TablePagination<T>({
                                                         })
                                                     }
                                                 </TrComponent>
-                                                )
+                                            )
                                         }
                                     )
                                 }
@@ -288,8 +332,12 @@ function TablePagination<T>({
                             />
                     </div>
                     <div className="grid grid-cols-6 md:flex text-xs border-b-1 border-t-1 rounded-lg">
-                        <Button className={`text-xs py-0 h-5`} variant={'ghost'} type="button" onClick={onChangePage} data-url={dataLinks?.first} disabled={!dataLinks?.first}>Awal</Button>
-                        <Button className="text-xs py-0 h-5" variant={'ghost'} type="button" onClick={onChangePage} data-url={dataLinks?.prev} disabled={!dataLinks?.prev}><ArrowLeft/></Button>
+                        {
+                            dataMeta.current_page !== 1 ? (<>
+                                <Button className={`text-xs py-0 h-5`} variant={'ghost'} type="button" onClick={onChangePage} data-url={dataLinks?.first} disabled={!dataLinks?.first}>Awal</Button>
+                                <Button className="text-xs py-0 h-5" variant={'ghost'} type="button" onClick={onChangePage} data-url={dataLinks?.prev} disabled={!dataLinks?.prev}><ArrowLeft/></Button>
+                            </>):null
+                        }
                         {
                             buttonPage.map((btn:string|number,index:number)=>{
                                 const getUrlPage = dataMetaLinks.find(s=>s.label == btn);
@@ -299,31 +347,36 @@ function TablePagination<T>({
                                 return (<Button key={index} className={`text-xs h-5 px-2 py-0 ${getUrlPage.active?'bg-sky-400':''}`} variant={'ghost'} type="button" onClick={onChangePage} data-url={getUrlPage.url} disabled={!getUrlPage.url}>{btn}</Button>)
                             })
                         }
-                        <Button className="text-xs py-0 h-5" variant={'ghost'} type="button" onClick={onChangePage} data-url={dataLinks?.next} disabled={!dataLinks?.next}><ArrowRight/></Button>
-                        <Button className="text-xs py-0 h-5" variant={'ghost'} type="button" onClick={onChangePage} data-url={dataLinks?.last} disabled={!dataLinks?.last}>Akhir</Button>
+                        {
+                            dataMeta.current_page !== dataMeta.last_page ?(
+                                <>
+                                    <Button className="text-xs py-0 h-5" variant={'ghost'} type="button" onClick={onChangePage} data-url={dataLinks?.next} disabled={!dataLinks?.next}><ArrowRight/></Button>
+                                    <Button className="text-xs py-0 h-5" variant={'ghost'} type="button" onClick={onChangePage} data-url={dataLinks?.last} disabled={!dataLinks?.last}>Akhir</Button>
+                                </>
+                            ):null
+                        }
                     </div>
                 </WrapperPagination>
-                    <ModalByConfig 
-                        className="md:min-w-3xl"
-                        title = {modeCrud??configModal.mode}
-                        description = {configModal.description}
-                        open = {showModal}
-                        setOpen = {setShowModal}
-                        contentType ={configModal.contentType}
-                        contentFields = {configModal.contentFields}
-                        currentData = {dataModal??{}}
-                        setCurrentData={setDataModal as unknown as React.Dispatch<React.SetStateAction<Record<string, any>>>}
-                        mode = {modeCrud??configModal.mode}
-                        onAdd = {configModal.onAdd??undefined}
-                        messageDelete={configModal.messageDelete}
-                        contentTabHeaders={configModal.contentTabHeaders}
-                        contentTabHeadersOnly={configModal.contentTabHeadersOnly}
-                        polymorphicFields={configModal.polymorphicFields}
-                        onUpdate={configModal.onUpdate}
-                        onDelete={configModal.onDelete}
-                        closeOnOutsideClick={configModal.closeOnOutsideClick}
-                        interactiveField = {configModal.interactiveField}
-                    />
+                <ModalByConfig 
+                    className="md:min-w-3xl"
+                    title = {titleModal}
+                    description = {stateConfigModal.description}
+                    open = {showModal}
+                    setOpen = {setShowModal}
+                    contentType ={stateConfigModal.contentType}
+                    contentFields = {stateConfigModal.contentFields}
+                    currentData={currentData as Record<string, any>}
+                    setCurrentData={setCurrentData as React.Dispatch<React.SetStateAction<Record<string, any>>> | undefined}
+                    mode = {modeCrud??stateConfigModal.mode}
+                    onAdd = {stateConfigModal.onAdd??undefined}
+                    messageDelete={stateConfigModal.messageDelete}
+                    layoutingTabs={stateConfigModal.layoutingTabs}
+                    layoutingTabsOnly={stateConfigModal.layoutingTabsOnly}
+                    polymorphicFields={stateConfigModal.polymorphicFields}
+                    onUpdate={stateConfigModal.onUpdate}
+                    onDelete={stateConfigModal.onDelete}
+                    closeOnOutsideClick={stateConfigModal.closeOnOutsideClick}
+                />
             </>
     );
 }
@@ -336,7 +389,7 @@ function resolveButtonAction(type:typeActionKey, handleClick:(e: React.MouseEven
     switch(type){
         case "edit":
             return <Button data-mode = "edit" data-id={dataId} className="p-0  has-[>svg]:p-0 bg-emerald-300 size-5" onClick={handleClick} asChild><SquarePen /></Button>
-            break;
+            
         case "edit-delete":
             return (
                 <>

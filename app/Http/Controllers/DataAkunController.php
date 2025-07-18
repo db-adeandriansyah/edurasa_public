@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
+use App\Models\School;
 use App\Models\Permission;
-use Illuminate\Http\Request;
 
+use Illuminate\Http\Request;
 use App\Services\UserService;
 use App\Http\Resources\DataApiCollection;
 use App\Http\Resources\UserResourceCollection;
@@ -30,10 +31,12 @@ class DataAkunController extends Controller
 
         $asli = $service->execute($request->query());
         $permission = Permission::get();
+        $schools = School::all();
 
         return Inertia::render('daftar-akun/index',[
             'data' => new DataApiCollection($asli),
-            'permission' => $permission
+            'permission' => $permission,
+            'dataschool' =>$schools
             ]
         );
     }

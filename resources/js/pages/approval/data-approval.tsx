@@ -1,8 +1,8 @@
 // Components
 import { TheadType, ThRefrencesType, ThType } from "@/components/table-pagination";
-import { FieldProps } from "@/components/table-pagination/modal-in-table-pagination";
+
 import { PrintAreaWithToolbarDefault } from "@/components/templating/workplace-provider-toolbar";
-import ApprovalController from "@/controllers/approval-controller";
+import ApprovalController from "@/containers/approval-controller";
 import FiturTemplate from "@/layouts/approval/approval-template";
 import { Head } from "@inertiajs/react";
 import { configModal } from "./config-modal-approval";
@@ -31,42 +31,21 @@ export default function DataApproval(){
             { rowHeaders: barisPertama }
         ];
 
-    const fieldsInputForm : FieldProps[] = [
-            {
-                id: 'inputId_user_name',
-                key: 'name',
-                name: 'name',
-                label: 'Nama User',
-                type: 'text',
-                placeholder: 'Nama Akun/User',
-                autocomplete: 'name',
-                tabIndex: -1,
-                autoFocus: false,
-            }, {
-                id: 'id_state_approval',
-                key: 'state_approval',
-                name: 'state_approval',
-                label: 'Status Approve',
-                type: 'text',
-                placeholder: 'Status Approval',
-                // autocomplete: 'name',
-                tabIndex: -1,
-                // autoFocus?: boolean;
-                // rows?: number;
-                // accept?: string;
-                // className?: string;
-            },
-        ];
-        
     return (
         <FiturTemplate title="Approval">
             <Head title="Approval"/>
             <PrintAreaWithToolbarDefault>
                 <h1 className="text-center font-bold mb-2">Daftar User yang Perlu Diapprove</h1>
+                <div className="border-1 rounded-4xl ms-1 p-3 text-xs">Keterangan:
+                    <ul className="list-outside list-disc">
+                        <li>Di sini Anda perlu melakukan approve bagi user yang butuh diapprove</li>
+                        <li>Anda harus memastikan bahwa user tersebut benar-benar sesuai dengan peran yang didaftarkan</li>
+                        <li>Jika ragu, atau pengguna mendaftarkan tidak sesuai peran, silakan pilih selain status 'Approve' kemudian berikan alasannya</li>
+                    </ul>
+                </div>
                 <ApprovalController 
                     paginationHeaderLabel={rowsheader} 
                     paginationColumnKey={columnKey}
-                    fieldsTemplate = {fieldsInputForm}
                     configModal = {configModal}
                 />
             </PrintAreaWithToolbarDefault>

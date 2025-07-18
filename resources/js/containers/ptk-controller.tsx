@@ -1,30 +1,26 @@
-
 import { ModalCustomInterface } from "@/components/modals/type";
-import {DataPaginationType, TheadType, ThRefrencesType} from "@/components/table-pagination";
-import { FieldProps, ModalInTablePagination } from "@/components/table-pagination/modal-in-table-pagination";
+import { DataPaginationType, TheadType, ThRefrencesType } from "@/components/table-pagination";
 import { TableConfigPaginationProps, TablePagination } from "@/components/table-pagination/table-paginaton";
 import { ApprovalData } from "@/models/approval-user-data.d";
-import {crudAction, type SharedData } from "@/types";
+import { crudAction, SharedData } from "@/types";
 import { usePage } from "@inertiajs/react";
+import { useCallback, useState } from "react";
 
-import { useCallback, useMemo, useState } from "react";
-
-export default function DaftarAkunController({
-        paginationHeaderLabel,
-        paginationColumnKey,
-        // fieldsTemplate,
-        configModal,
-    }:{
-        paginationHeaderLabel : TheadType[],
-        paginationColumnKey :  ThRefrencesType[],
-        // fieldsTemplate : FieldProps[]
-        configModal: ModalCustomInterface
-    }) {
-
-        const {data } = usePage<SharedData & {data:DataPaginationType<ApprovalData>}>().props;
-        // console.log('data woy', data);
-        // const {data  as ApprovalData } = usePage<SharedData>().props;
-        const [configTable, setConfigTable] = useState<TableConfigPaginationProps<ApprovalData>>({
+export default function PtkController(
+    {
+            paginationHeaderLabel,
+            paginationColumnKey,
+            // fieldsTemplate,
+            configModal,
+        }:{
+            paginationHeaderLabel : TheadType[],
+            paginationColumnKey :  ThRefrencesType[],
+            // fieldsTemplate : FieldProps[]
+            configModal: ModalCustomInterface
+        }) {
+            const {data } = usePage<SharedData & {data:DataPaginationType<ApprovalData>}>().props;
+                    console.log(data);
+            const [configTable, setConfigTable] = useState<TableConfigPaginationProps<ApprovalData>>({
                 dataawal: data,
                 addSearch:true,
                 addButton:true,
@@ -70,4 +66,5 @@ export default function DaftarAkunController({
         </>
 
     );
+
 }

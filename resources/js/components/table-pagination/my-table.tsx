@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import * as React from 'react';
 
 function WrapperTablePagination({ className, children , ...props}:React.ComponentProps<'div'>) {
     
@@ -12,9 +13,9 @@ function WrapperTablePagination({ className, children , ...props}:React.Componen
     );
 } 
 
-function TableDefault({children}:React.ComponentProps<'table'>) {
+function TableDefault({children, className}:React.ComponentProps<'table'>) {
     return (
-        <table className="w-full text-xs leading-normal" tabIndex={-1}>
+        <table className={cn("w-full text-xs leading-normal", className)} tabIndex={-1}>
             {children}
         </table>
     )

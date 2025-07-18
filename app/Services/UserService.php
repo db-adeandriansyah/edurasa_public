@@ -15,7 +15,7 @@ use App\Specifications\User\UserSearchRequestSpecification;
 
 class UserService
 {
-     protected UserRepositoryInterface $userRepository;
+    protected UserRepositoryInterface $userRepository;
     protected array $filters = [];
     protected array $sortBy = [];
     protected int $perPage = 20;

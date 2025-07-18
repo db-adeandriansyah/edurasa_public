@@ -23,4 +23,6 @@ export enum ApprovalEnum{
     DELETED = 'deleted',       
     // enum ketika akun telah dihapus oleh admin
     BLOCKED = 'blocked',
+    // enum ketika akun telah diterima oleh admin
+    APPROVE = 'approve'
 }

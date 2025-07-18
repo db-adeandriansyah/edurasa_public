@@ -6,7 +6,7 @@
  */
 
 import { crudAction } from "@/types";
-import React from "react";
+import React, { ReactNode } from "react";
 
 export type contentField = FieldInputText | 
                     FieldInputNumber |
@@ -15,7 +15,8 @@ export type contentField = FieldInputText |
                     FieldSelectOne |
                     FieldDescription |
                     FieldComboBox |
-                    FieldTimeline 
+                    FieldTimeline |
+                    FieldRadio
                     ;
 export interface ModalCustomInterface{
     //title dan description bisa ditimpa saat pembuatan props atau tipe modal
@@ -43,7 +44,7 @@ export interface ModalCustomInterface{
     onAdd?:()=>void;
     
     className?:string;
-    messageDelete?:string
+    messageDelete?:string|ReactNode
     
     polymorphicFields?:polymorphicField[];
     
@@ -54,10 +55,10 @@ export interface ModalCustomInterface{
 interface baseField{
     id: string|number // kadang id dari db itu uuid, jadi string dipake
     key: string
-    name: string;
-    label: string;
+    name?: string;
+    label?: string;
     type: string;
-    placeholder: string;
+    placeholder?: string;
     autocomplete?: string;
     tabIndex?: number;
     autoFocus?: boolean;
@@ -71,6 +72,7 @@ export interface FieldInputText extends Omit<baseField,'accept'>{
     type:'text'
     value: string
     onChange:(value:string)=>void
+    disabled?:boolean
 }
 
 export interface FieldInputHidden extends Omit<baseField,'accept'>{
@@ -103,22 +105,33 @@ export interface RadioField{
     id:string;
     value:string;
     name:string;
-    label:string;
+    label:string|FieldInputText;
     disabled?:boolean
     checked?:boolean
 }
 
 export interface FieldSelectOne extends Omit<baseField, 'accent'>{
     type: 'select-one'
-    value:string|number
+    value?:string|number
     multiple?: false;
     onChange:(value:string|number)=>void
     options: OptionField[];
     action?:ActionFieldInteractive[];
+    disabled?:boolean
+    defaultValue?:string
 }
 
 export interface FieldComboBox extends Omit<baseField, 'accent'>{
     type: 'combobox';
+    refKey:string
+    value?:string|number
+    onChange:(value:string|number)=>void
+    lists: RadioField[];
+    action?:ActionFieldInteractive[];
+}
+
+export interface FieldRadio extends Omit<baseField, 'accent'>{
+    type: 'radio';
     refKey:string
     value?:string|number
     onChange:(value:string|number)=>void
@@ -172,11 +185,15 @@ export interface polymorphicField{
 export interface FieldInteractive{
     fieldKeyHasInteractive: string;
     // proposalKeyAction:string[]
-    action: ActionFieldInteractive[]
+    action: ActionFieldInteractive[];
+    
 }
 
 export interface ActionFieldInteractive{
     fieldValue:string;
     resultThruthly: contentField[]|undefined
-    levelComponent?:'single'|'card'
+    levelComponent?:'single'|'card' 
+    
+    shouldBeFilterByParam?:boolean;
+    callbackFilter?:(param:string)=>void
 }

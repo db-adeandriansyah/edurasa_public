@@ -8,11 +8,13 @@
  * return mengambil component dari 'my-workplace' yang ada di directory '/components/my-ui/my-workplace.tsx
  */
 
+import { usePage } from "@inertiajs/react";
 import { MyWorkplace, MyContentWorkplace } from "../my-ui/my-workplace";
 import { WorkplaceControlPrintarea } from "./workplace-control-printarea";
 import WorkplaceHeader from "./workplace-header";
 import WorkplaceSidebar from './workplace-sidebar';
 import WorkplaceSticky from "./workplace-sticky";
+import { SharedData } from "@/types";
 
 type typeRoom = 'rombel' | 'jenjang' ;
 interface shellPropsAplikasi {
@@ -23,8 +25,9 @@ interface shellPropsAplikasi {
     typeRoom?:typeRoom
 }
 export default function WorkplaceShell({title, children,showRoom,showPrintable,typeRoom='rombel'}:shellPropsAplikasi){
+    const isOpen = usePage<SharedData>().props.sidebarOpen;
     return(
-        <MyWorkplace>
+        <MyWorkplace defaultOpen={isOpen}>
             <WorkplaceHeader/>
             <MyContentWorkplace className="shadow-lg bg-gray-50/50 backdrop-blur-[70px]/50 ">
                 <WorkplaceSticky 

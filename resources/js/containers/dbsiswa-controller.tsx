@@ -1,7 +1,5 @@
-import { PrintAreaWithToolbarDefault, ToolbarDefault } from "@/components/templating/workplace-provider-toolbar";
+import { PrintAreaWithToolbarDefault } from "@/components/templating/workplace-provider-toolbar";
 import { WorkplaceTabsToolbar } from "@/components/templating/workplace-tabs-toolbar";
-import { usePage } from "@inertiajs/react";
-import { useCallback, useState } from "react";
 
 const TestData = [
     {

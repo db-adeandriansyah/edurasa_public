@@ -1,7 +1,7 @@
 import DbSiswaTemplate from "@/layouts/fitur/db-siswa-template";
 import { Head } from "@inertiajs/react";
 import logo from "../../images/lamaso.webp"
-import { DbsiswaController } from "@/controllers/dbsiswa-controller";
+import { DbsiswaController } from "@/containers/dbsiswa-controller";
 
 export default function Dbsiswa(){
     return(

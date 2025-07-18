@@ -1,3 +1,4 @@
+import { ReactNode, RefCallback } from "react";
 
 export interface ThType {
     label: string;
@@ -10,11 +11,12 @@ export interface ThType {
 }
 export type typeActionKey = "edit" | "delete" | "edit-delete";
 export interface ThRefrencesType {
-    key: string|'action'|'index'|null
+    key: string|'action'|'index'|'callback'|null
     className?:string
     isImage?: boolean
     isAction?: boolean
-    actionKey?:string | number
+    actionKey?:string 
+    isCallback?:(actionKey:string|undefined)=>string
     actionKeyType?: typeActionKey;
 }
 

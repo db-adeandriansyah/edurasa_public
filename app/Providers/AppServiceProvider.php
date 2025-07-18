@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\Domain\PtkService;
 use Illuminate\Support\ServiceProvider;
 use App\Services\UseCase\UserApprovalPendingService;
 
@@ -17,7 +18,12 @@ class AppServiceProvider extends ServiceProvider
             'App\Interfaces\UserRepositoryInterface', 'App\Repositories\UserRepository'
         );
         
+        $this->app->bind(
+            'App\Interfaces\PtkRepositoryInterface', 'App\Repositories\PtkRepository'
+        );
+        
         $this->app->singleton(UserApprovalPendingService::class);
+        $this->app->singleton(PtkService::class);
     }
 
     /**

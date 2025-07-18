@@ -7,13 +7,13 @@ import { BadgeInfo, LayoutGrid, UserCheck } from "lucide-react";
 
 const subfitur:NavItem[] =[
     {
-        title: 'Daftar Ptk',
+        title: 'Approval',
         href: '/approval',
         icon: LayoutGrid,
     },
     {
         title: 'Daftar Akun',
-        href: '/approval-akun',
+        href: '/daftar-akun',
         icon: UserCheck,
     },
     {

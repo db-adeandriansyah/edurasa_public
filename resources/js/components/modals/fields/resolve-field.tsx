@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import { contentField, FieldComboBox, FieldSelectOne, FieldTimeline, ListFieldItem } from "../type";
+import { contentField, FieldComboBox, FieldInputText, FieldRadio, FieldSelectOne, FieldTimeline, ListFieldItem, RadioField } from "../type";
 import * as React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { getValueByPath, setValueByPath } from "./helper-modal";
@@ -20,6 +20,8 @@ export function ResolveFieldByType({type,currentData,setCurrentData}:{type?:cont
             return <ResolveSelectField type={type} currentData={currentData} setCurrentData={setCurrentData}/>;
         case 'combobox':
             return <ResolveComboboxField type={type} currentData={currentData} setCurrentData={setCurrentData}/>;
+        case 'radio':
+            return <ResolveRadioField type={type} currentData={currentData} setCurrentData={setCurrentData}/>;
         case 'timeline':
             return <ResolveTimeLine type={type} currentData={currentData}/>
         case 'description':
@@ -56,7 +58,7 @@ export function ResolveFieldByTypeOnly({type, currentData, setCurrentData,conten
 
 export function ResolveTimeLine({type,currentData}:{type:FieldTimeline, currentData?:Record<string|number, any>}){
     const dataList = getValueByPath(currentData, type.key);
-    
+    if(!dataList) return null;
     return (
         <ol className="relative border-s border-gray-200 dark:border-gray-700">
             {
@@ -74,40 +76,47 @@ export function ResolveTimeLine({type,currentData}:{type:FieldTimeline, currentD
 
 export function ResolveSelectField({type, currentData, setCurrentData}:{type: FieldSelectOne, currentData?:Record<string| number,  any>, setCurrentData?: React.Dispatch<React.SetStateAction<Record<string, any>>>}){
     const fieldValue = type?.key && getValueByPath(currentData, type.key); 
+    
     const activeFields = type?.action
-    ?.find((s) => s.fieldValue === fieldValue)
-    ?.resultThruthly || [];
+        ?.find((s) => s.fieldValue === fieldValue)
+        ?.resultThruthly || [];
 
+    
     const currentKeys = activeFields.map((field) => field.key);
+    const allkeys = currentData?.map((keys:any)=>keys.key);
+    console.log('currentKeys on ResolveSelectedField', currentKeys, allkeys)
     useCleanupFieldData(currentKeys, setCurrentData ?? (() => {}));
-
+    
     return(
         <>
-        <div className="relative mt-3 mb-1">
-            <select 
-                id={type.id as string} 
-                name={type.name}
-                value={fieldValue||""}
-                onChange={(e) => setCurrentData?.({...currentData, ...setValueByPath(currentData, type.key, e.currentTarget.value)})}
-                className="mb-2  bg-white dark:bg-gray-700 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            >
-                {
-                    ('options' in type)?(
-                        type.options.map((opt,index)=>
-                            <option key={index} selected={opt.selected} value={opt.value}>{opt.label}</option>
-                        )
+            <div className="relative mt-3 mb-1">
+                <select 
+                    id={type.id as string} 
+                    name={type.name}
+                    value={fieldValue||""}
+                    
+                    disabled={type?.disabled}
+                    onChange={(e) => setCurrentData?.({...currentData, ...setValueByPath(currentData, type.key, e.currentTarget.value)})}
+                    className="mb-2  bg-white dark:bg-gray-700 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                >
+                    {
+                        ('options' in type)?(
+                            type.options.map((opt,index)=>
+                                <option key={index} selected={opt.selected} value={opt.value}>{opt.label}</option>
+                            )
 
-                    ):null
-                }
-            </select>
-            <label htmlFor={type.id as string} className="absolute text-sm  bg-white   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0]  px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">{type.label}</label>
-            
-        </div>
-        {
-            type?.action && type.action.find(s=>s.fieldValue==fieldValue)?.resultThruthly?.map((field, index)=>
-                <ResolveFieldByType key={index} type={field} currentData={currentData} setCurrentData={setCurrentData}/>
-            )
-        }
+                        ):null
+                    }
+                </select>
+                <label htmlFor={type.id as string} className="absolute text-sm  bg-white   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0]  px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">{type.label}</label>
+                
+            </div>
+            {   
+                
+                type?.action && type.action.find(s=>s.fieldValue==fieldValue)?.resultThruthly?.map((field, index)=>
+                    <ResolveFieldByType key={index} type={field} currentData={currentData} setCurrentData={setCurrentData}/>
+                )
+            }
         </>
     )
 }
@@ -117,7 +126,7 @@ export function ResolveComboboxField({type, currentData, setCurrentData}:{type: 
     ? getValueByPath(currentData, type.refKey)
     : [];
     
-  const handleChange = (value: string) => {
+    const handleChange = (value: string) => {
         const newValue = fieldValue.includes(value)
         ? fieldValue.filter(v => v !== value) // uncheck
         : [...fieldValue, value]; // check
@@ -138,10 +147,54 @@ export function ResolveComboboxField({type, currentData, setCurrentData}:{type: 
                         checked={fieldValue.includes(ops.value)}
                         onChange={() => handleChange(ops.value)}
                         className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-lg outline-0 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"/>
-                    <label htmlFor={ops.id} className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                    {ops.label}
+                        <label htmlFor={ops.id}  className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">    
+                            {typeof ops.label ==='string'?<span dangerouslySetInnerHTML={{ __html:ops.label }}/>:(
+                            
+                                    <ResolveFieldByType type={ops.label} currentData={currentData} setCurrentData={setCurrentData}/>
 
+                            )}
                     </label>
+                    
+                </div>
+        )
+    )
+}
+
+export function ResolveRadioField({type, currentData, setCurrentData}:{type: FieldRadio, currentData?:Record<string| number,  any>, setCurrentData?: React.Dispatch<React.SetStateAction<Record<string, any>>>}){
+    const fieldValue = type?.key && getValueByPath(currentData, type.refKey); 
+    const activeFields = type?.action
+    ?.find((s) => s.fieldValue === fieldValue)
+    ?.resultThruthly || [];
+
+    const dataFind = type?.action?.find(s=>s.fieldValue==fieldValue);
+    // const shouldBe = dataFind?.;
+    const currentKeys = activeFields.map((field) => field.key);
+    useCleanupFieldData(currentKeys, setCurrentData ?? (() => {}));
+    const hasLabelField = type.lists.find(s=>typeof s.label !=='string') ;//as RadioField;
+    
+    const handleChecked = (value:string|number)=>{
+        if(hasLabelField){
+            setCurrentData?.({...currentData, ...setValueByPath(currentData, (hasLabelField.label as FieldInputText).key, '')})
+
+        }
+        setCurrentData?.({...currentData, ...setValueByPath(currentData, type.refKey, value)})
+    }
+    return (
+        type.lists.map((ops,i)=>
+                <div className="flex items-center mb-4" key={ops.id+i}>
+                    <input 
+                        id={ops.id} 
+                        name={ops.name} 
+                        value={ops.value} 
+                        type="radio" 
+                        // onChange={(e) => setCurrentData?.({...currentData, ...setValueByPath(currentData, type.refKey, e.currentTarget.value)})}
+                        onChange={(e) => handleChecked(e.currentTarget.value)}
+                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-lg outline-0 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"/>
+                        <label htmlFor={ops.id}  className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">    
+                                {typeof ops.label ==='string'?<span dangerouslySetInnerHTML={{ __html:ops.label }}/>:(
+                                    <ResolveFieldByType type={ops.label} currentData={currentData} setCurrentData={setCurrentData}/>
+                                )}
+                        </label>
                 </div>
         )
     )
@@ -151,14 +204,20 @@ export function ResolveConvertFieldList({type,currentData, setCurrentData}:{type
     const fieldValue:string[] = Array.isArray(getValueByPath(currentData, type.refKey))
     ? getValueByPath(currentData, type.refKey)
     : [];
-    console.log(fieldValue,getValueByPath(currentData, type.refKey));
+    
     return (
         <ol className="list-outside list-disc">
             {type.lists.map((ops,i)=>
                     
                         fieldValue.includes(ops.value)&&(
                         <li key={i+ops.id}>
-                            {ops.label}
+                            {
+                                typeof ops.label ==='string'?(
+                                    <span dangerouslySetInnerHTML={{ __html:ops.label }}/>
+                                ):(
+                                    <ResolveFieldByType type={ops.label} currentData={currentData} setCurrentData={setCurrentData}/>
+                                )
+                            }
                         </li>
 
                         )
